@@ -8,14 +8,14 @@ import {
 
 // Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyBbO1ujPZBlz3yHAkiHdW68SeYDGJl_G3o",
-  authDomain: "hecfa-tn.firebaseapp.com",
-  databaseURL: "https://hecfa-tn-default-rtdb.firebaseio.com",
-  projectId: "hecfa-tn",
-  storageBucket: "hecfa-tn.firebasestorage.app",
-  messagingSenderId: "391698332082",
-  appId: "1:391698332082:web:6202f41a070210cc528cab",
-  measurementId: "G-YBC6PDL9WV",
+  apiKey: "",
+  authDomain: "",
+  databaseURL: "",
+  projectId: "",
+  storageBucket: "",
+  messagingSenderId: "",
+  appId: "",
+  measurementId: "",
 };
 
 // Initialize Firebase
