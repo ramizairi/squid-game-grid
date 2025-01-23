@@ -1,37 +1,82 @@
-export default class Player {
-    constructor(number, picUrl) {
-        this.number = number;
-        this.picUrl = picUrl;
-        this.alive = true;
-    }
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+import {
+  getFirestore,
+  collection,
+  getDocs,
+  onSnapshot,
+} from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-    getNumber = () => this.number;
-    getPicUrl = () => this.picUrl;
-    isAlive = () => this.alive;
-    setAlive = (alive) => this.alive = alive;
+// Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyBbO1ujPZBlz3yHAkiHdW68SeYDGJl_G3o",
+  authDomain: "hecfa-tn.firebaseapp.com",
+  databaseURL: "https://hecfa-tn-default-rtdb.firebaseio.com",
+  projectId: "hecfa-tn",
+  storageBucket: "hecfa-tn.firebasestorage.app",
+  messagingSenderId: "391698332082",
+  appId: "1:391698332082:web:6202f41a070210cc528cab",
+  measurementId: "G-YBC6PDL9WV",
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+export default class Player {
+  constructor(number, picUrl) {
+    this.number = number;
+    this.picUrl = picUrl;
+    this.alive = true;
+  }
+
+  getNumber = () => this.number;
+  getPicUrl = () => this.picUrl;
+  isAlive = () => this.alive;
+  setAlive = (alive) => (this.alive = alive);
 }
 
 const DEFAULT_NUM_OF_PLAYERS = 37;
 function genDefaultPlayers() {
-    let players = [];
-    for (let i = 1; i <= DEFAULT_NUM_OF_PLAYERS; i++) {
-        players.push(new Player(i, "456.webp"));
-    }
-    return players;
+  let players = [];
+  for (let i = 1; i <= DEFAULT_NUM_OF_PLAYERS; i++) {
+    players.push(new Player(i, "456.webp"));
+  }
+  return players;
 }
 
-export async function genPlayers(configPath) {
-    let players = [];
-    await fetch(configPath)
-        .then(response => response.json())
-        .then(json => {
-            json.players.forEach((player) => {
-                players.push(new Player(player.number, player.picUrl));
-            });
-        })
-        .catch(() => {
-            console.log("config.json not found, using default players");
-            players = genDefaultPlayers();
-        });
-    return players;
+export async function genPlayers() {
+  let players = [];
+  try {
+    const playersRef = collection(db, "players");
+    const snapshot = await getDocs(playersRef);
+    snapshot.forEach((doc) => {
+      const playerData = doc.data();
+      players.push(new Player(playerData.number, playerData.picUrl));
+    });
+  } catch (error) {
+    console.error("Error fetching players from Firestore: ", error);
+    console.log("Using default players");
+    players = genDefaultPlayers();
+  }
+  return players;
 }
+
+// Function to set up real-time updates
+export function setupRealTimeUpdates(callback) {
+  const playersRef = collection(db, "players");
+
+  // Set up a real-time listener
+  onSnapshot(playersRef, (snapshot) => {
+    console.log("Players updated in real-time!");
+    const updatedPlayers = [];
+    snapshot.forEach((doc) => {
+      const playerData = doc.data();
+      updatedPlayers.push(new Player(playerData.number, playerData.picUrl));
+    });
+
+    // Call the callback function with the updated players
+    callback(updatedPlayers);
+  });
+}
+
+export { db }; // Export the Firestore instance
